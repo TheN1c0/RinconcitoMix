@@ -1,4 +1,4 @@
-# Rinconcito Mix 🐾
+# Rinconcito Mix 🐾 — Plataforma E-commerce
 
 ![Next.js](https://img.shields.io/badge/Next.js-14-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
@@ -6,49 +6,31 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38B2AC)
 ![Supabase](https://img.shields.io/badge/Supabase-DB-3ECF8E)
 
-Plataforma oficial de comercio electrónico para accesorios, plaquitas personalizadas y productos para mascotas en Chile. Construido con arquitectura limpia empleando Next.js, bases de datos PostgreSQL (Supabase) y Transbank para pagos.
+Plataforma oficial de comercio electrónico exclusiva para **Rinconcito Mix**, especializada en accesorios, plaquitas personalizadas y productos para mascotas en Chile. 
 
-## Características 🌟
+Este repositorio contiene el código fuente de la tienda en línea y el sistema de administración (Panel Admin), construido con una arquitectura escalable orientada a ventas, SEO y cumplimiento legal de comercio en Chile.
 
-- **Catálogo Dinámico:** Gestión completa de stock, variaciones y categorías desde un panel administrativo.
-- **Páginas Legales y Desglose Tributario:** Adaptación automática a normas SERNAC (Chile) y preparado para SII con IVA detallado en cada compra.
-- **Webpay Plus Integrado:** Pasarela para tarjetas de débito/crédito gestionada por Transbank.
-- **Flujo de Pago Optimizado:** Carrito de estado global, notificaciones por email automatizadas vía Resend y un panel de seguimiento de compras sin registro obligatorio.
+## Características Principales 🌟
+
+- **Gestión de Catálogo:** Administración total de productos, categorías, niveles de stock y variaciones de precio por tallas/diseños.
+- **Cumplimiento Normativo (Chile):** Integración nativa con políticas de consumidor (SERNAC), derecho a retracto de 10 días, y arquitectura de base de datos preparada para integración directa con facturación/boleta electrónica del Servicio de Impuestos Internos (SII).
+- **Pasarela de Pago:** Conexión nativa con **Webpay Plus** (Transbank) respaldada en la nube para procesamiento de tarjetas bancarias.
+- **Notificaciones Transaccionales:** Sistema integrado de envíos de correos electrónicos automáticos para comprobantes de pago e hitos del envío.
+- **Diseño Dinámico:** UI/UX cuidadosamente diseñada con Tailwind v4.
 
 ---
 
-## Para Desarrolladores 🛠
+## Documentación del Proyecto 📚
 
-Para correr la aplicación en ambiente de desarrollo, sigue los siguientes pasos:
+Toda la lógica de negocio, arquitectura y hojas de ruta están centralizadas en los documentos base. Para mantener la consistencia del desarrollo, consulta:
 
-### 1. Variables de Entorno
-Copia el archivo base y rellena las credenciales con tu instancia de base de datos.
-```bash
-cp .env.example .env.local
-```
+1. **[PLAN_RINCONCITO_MIX.md](./PLAN_RINCONCITO_MIX.md)**: El documento principal (fuente de la verdad). Detalla todos los endpoints, el modelado relacional de bases de datos, los requerimientos legales y la arquitectura en la nube.
+2. **[DESIGN.md](./DESIGN.md)**: El sistema de diseño que incluye paleta de colores corporativos, tipografía y variables de componente (`globals.css`).
+3. **[PROGRESO.md](./PROGRESO.md)**: *No rastreado*. Tablero de control de fases e hitos de liberación.
 
-### 2. Base de Datos
-La aplicación usa **Prisma** para gestionar la base de datos PostgreSQL. Usa los siguientes comandos para sincronizar las tablas y poblar datos básicos:
-
-```bash
-# Push el esquema a la base de datos
-npx prisma db push
-
-# (Opcional) Generar el cliente de Prisma internamente
-npx prisma generate
-```
-
-### 3. Servidor de Desarrollo
-Instala todas las dependencias e inicia el cliente en `localhost:3000`:
-```bash
-npm install
-npm run dev
-```
-
-Abre [http://localhost:3000](http://localhost:3000) en el navegador para ver los resultados iniciales.
-
-## Apilamiento (Stack) 📚
-* **Frontend:** Next.js 14, TailwindCSS v4, React Hook Form, Zustand.
-* **Backend:** Server Actions (Next.js), Node.js.
-* **DB & Autenticación:** PostgreSQL (Supabase), Prisma ORM, NextAuth (Auth.js v5). 
-* **Servicios e-mail:** Resend, React Email.
+## Apilamiento Tecnológico (Stack) 🛠
+* **Frontend:** Next.js 14 (App Router), React 19, TailwindCSS v4, React Hook Form, Zustand (Manejo global de carritos).
+* **Backend:** Next.js Server Actions y Node.js.
+* **Base de Datos:** PostgreSQL (Cloud Supabase) mediado por Prisma ORM.
+* **Autenticación:** NextAuth v5 (Auth.js) / Google Provider.
+* **Integraciones API:** Transbank SDK, Resend (Emails).
