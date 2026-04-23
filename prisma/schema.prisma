@@ -1,0 +1,252 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ── Modelos de NextAuth v5 ──
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role      @default(USER)
+  accounts      Account[]
+  sessions      Session[]
+  orders        Order[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+// ── Modelos de Negocio (E-commerce) ──
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Product {
+  id          String           @id @default(cuid())
+  name        String
+  slug        String           @unique
+  description String?          @db.Text
+  price       Decimal          @db.Decimal(10, 2)
+  stock       Int              @default(0)
+  images      String[]
+  categoryId  String?
+  category    Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  isCustom    Boolean          @default(false)
+  variants    ProductVariant[]
+  orderItems  OrderItem[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([categoryId])
+}
+
+model ProductVariant {
+  id         String      @id @default(cuid())
+  productId  String
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name       String      // ej: "Talla M, Rojo"
+  price      Decimal?    @db.Decimal(10, 2) // Precio específico si es distinto al base
+  stock      Int         @default(0)
+  orderItems OrderItem[]
+
+  @@index([productId])
+}
+
+// ── Modelos de Pago y Pedidos ──
+
+model Order {
+  id            String      @id @default(cuid())
+  orderNumber   Int         @unique @default(autoincrement()) // Número correlativo para boletas/facturas (SII)
+  userId        String?
+  user          User?       @relation(fields: [userId], references: [id])
+
+  // Datos del comprador (para usuarios sin cuenta)
+  buyerEmail    String
+  buyerName     String
+  buyerPhone    String?
+  buyerRut      String?     // RUT del comprador (opcional ahora, requerido cuando se integre SII)
+
+  // Envío
+  shippingAddress Json      // { street, city, state, zip }
+
+  items         OrderItem[]
+  status        OrderStatus @default(PENDING)
+
+  // Pago
+  paymentMethod String?     // "webpay_credit", "webpay_debit", "transfer" (registrar medio de pago)
+  webpayToken   String?
+  webpayBuyOrder String?   @unique
+
+  // Montos — desglose para contabilidad y SII
+  netAmount     Decimal     @db.Decimal(10, 2)  // Monto neto (sin IVA)
+  iva           Decimal     @default(0) @db.Decimal(10, 2)  // IVA 19% (Chile)
+  subtotal      Decimal     @db.Decimal(10, 2)  // netAmount + iva (total productos)
+  shipping      Decimal     @default(0) @db.Decimal(10, 2)
+  total         Decimal     @db.Decimal(10, 2)  // subtotal + shipping (lo que paga el cliente)
+
+  // Facturación (preparado para SII — campos se activan al tener inicio de actividades)
+  // invoiceNumber  String?  // Folio de boleta electrónica (SII) — activar en futuro
+  // invoiceStatus  String?  // "emitted", "voided" — activar en futuro
+  // invoicePdf     String?  // URL al PDF de la boleta — activar en futuro
+
+  // Fechas de seguimiento
+  paidAt        DateTime?   // Fecha exacta del pago confirmado (para reportes de venta)
+
+  // Notificaciones
+  emailSent     Boolean     @default(false)
+  whatsappSent  Boolean     @default(false)
+
+  // Retracto (Ley 19.496 — 10 días)
+  retractedAt   DateTime?   // Fecha en que el cliente ejerció retracto
+  retractReason String?     // Motivo (opcional, para análisis interno)
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([status])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([paidAt])           // Clave para queries de ventas por período
+}
+
+enum OrderStatus {
+  PENDING
+  PAYMENT_PROCESSING
+  PAID
+  IN_PREPARATION
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+  RETRACTED             // Derecho a retracto ejercido (Ley 19.496 — 10 días)
+}
+
+model OrderItem {
+  id          String          @id @default(cuid())
+  orderId     String
+  order       Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product         @relation(fields: [productId], references: [id], onDelete: Restrict)
+  variantId   String?
+  variant     ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+
+  quantity    Int
+  unitPrice   Decimal         @db.Decimal(10, 2)  // Snapshot del precio al momento de la compra
+  variantName String?         // Snapshot del nombre de la variante (histórico)
+
+  // Customización guardada
+  customData  Json?           // { petName: "Bella", phone: "555-0198" }
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  excerpt     String
+  content     String   @db.Text      // Markdown
+  coverImage  String?
+  isPublished Boolean  @default(false)
+  publishedAt DateTime?
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ── Configuración de la tienda (editable desde /dashboard/configuracion) ──
+
+model StoreSettings {
+  id              String   @id @default("main")  // Singleton — solo 1 registro
+  storeName       String   @default("Rinconcito Mix")
+  storeRut        String?  // RUT de la empresa (cuando exista inicio de actividades)
+  storeEmail      String   @default("contacto@rinconcito.cl")
+  storePhone      String?
+  storeAddress    String?  // Domicilio fiscal
+  storeCity       String   @default("Santiago")
+  storeLogo       String?  // URL del logo
+
+  // Redes sociales
+  instagram       String?
+  facebook        String?
+  tiktok          String?
+  whatsapp        String?  // Número con código país: +56912345678
+
+  // Envío
+  shippingMessage String?  // "Envío gratis sobre $30.000" (mostrar en header)
+  freeShippingMin Decimal? @db.Decimal(10, 2)  // Monto mínimo para envío gratis
+
+  // Checkout
+  acceptTermsRequired Boolean @default(true)   // Checkbox obligatorio en checkout
+
+  updatedAt       DateTime @updatedAt
+}
+
+model LegalPage {
+  id          String   @id @default(cuid())
+  slug        String   @unique  // "terminos", "privacidad", "devoluciones", "envio"
+  title       String            // "Términos y Condiciones"
+  content     String   @db.Text // Markdown — editable desde admin
+  isPublished Boolean  @default(true)
+  updatedAt   DateTime @updatedAt
+}

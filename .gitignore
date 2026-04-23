@@ -1,8 +1,11 @@
 # =============================================
 # ARCHIVOS DE GUÍA / DISEÑO (no son parte del proyecto)
 # =============================================
+PROGRESO.md
 PLAN_RINCONCITO_MIX.md
 DESIGN.md
+AGENTS.md
+CLAUDE.md
 code.html
 code_home.html
 code_catalogo.html
@@ -15,62 +18,43 @@ code_catalogo.png
 # =============================================
 # DEPENDENCIAS
 # =============================================
-node_modules/
-.pnp
-.pnp.js
-.pnp.cjs
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
 # =============================================
 # NEXT.JS
 # =============================================
-.next/
-out/
-build/
-.swc/
+/.next/
+/out/
+/build
 
 # =============================================
 # VARIABLES DE ENTORNO
 # =============================================
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env*.local
+.env*
 
 # =============================================
 # PRISMA (archivos generados)
 # =============================================
 prisma/generated/
-prisma/*.db
-prisma/*.db-journal
 
 # =============================================
 # TESTING
 # =============================================
-coverage/
-.nyc_output/
+/coverage
 
 # =============================================
 # SISTEMA OPERATIVO
 # =============================================
 .DS_Store
 Thumbs.db
-ehthumbs.db
 Desktop.ini
-*.swp
-*.swo
-*~
-
-# =============================================
-# IDEs / EDITORES
-# =============================================
-.vscode/
-!.vscode/settings.json
-!.vscode/extensions.json
-.idea/
-*.sublime-project
-*.sublime-workspace
 
 # =============================================
 # LOGS
@@ -78,17 +62,16 @@ Desktop.ini
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
 .pnpm-debug.log*
 
 # =============================================
 # VERCEL
 # =============================================
-.vercel/
+.vercel
 
 # =============================================
 # MISC
 # =============================================
 *.tsbuildinfo
 next-env.d.ts
-.turbo/
+*.pem
