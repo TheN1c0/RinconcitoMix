@@ -31,19 +31,9 @@ export default async function ProductPage({ params }: PageProps) {
     notFound();
   }
 
-  // Convertir tipos Prisma Decimal a number/any compatible con el cliente
-  const serializedProduct = {
-    ...product,
-    price: product.price.toString(),
-    variants: product.variants.map(v => ({
-      ...v,
-      price: v.price ? v.price.toString() : null,
-    })),
-  };
-
   return (
     <main className="flex-grow max-w-[1200px] w-full mx-auto px-6 md:px-md py-lg">
-      <ProductDetailClient product={serializedProduct as any} />
+      <ProductDetailClient product={product as any} />
     </main>
   );
 }

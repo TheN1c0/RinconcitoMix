@@ -51,7 +51,10 @@ export async function getProducts(filters: ProductFilters) {
     },
   });
 
-  return products;
+  return products.map((product) => ({
+    ...product,
+    price: Number(product.price),
+  }));
 }
 
 export async function getCategories() {
@@ -63,11 +66,22 @@ export async function getCategories() {
 }
 
 export async function getProductBySlug(slug: string) {
-  return await prisma.product.findUnique({
+  const product = await prisma.product.findUnique({
     where: { slug },
     include: {
       category: true,
       variants: true,
     },
   });
+
+  if (!product) return null;
+
+  return {
+    ...product,
+    price: Number(product.price),
+    variants: product.variants.map((v) => ({
+      ...v,
+      price: v.price ? Number(v.price) : null,
+    })),
+  };
 }
