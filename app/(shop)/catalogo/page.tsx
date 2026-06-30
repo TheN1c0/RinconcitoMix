@@ -5,13 +5,14 @@ import { CatalogFilters } from "@/components/shop/CatalogFilters";
 export default async function CatalogoPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const category = typeof searchParams.category === "string" ? searchParams.category : undefined;
-  const minPrice = typeof searchParams.minPrice === "string" && !isNaN(Number(searchParams.minPrice)) ? Number(searchParams.minPrice) : undefined;
-  const maxPrice = typeof searchParams.maxPrice === "string" && !isNaN(Number(searchParams.maxPrice)) ? Number(searchParams.maxPrice) : undefined;
-  const inStock = searchParams.inStock === "true";
-  const search = typeof searchParams.search === "string" ? searchParams.search : undefined;
+  const resolvedParams = await searchParams;
+  const category = typeof resolvedParams.category === "string" ? resolvedParams.category : undefined;
+  const minPrice = typeof resolvedParams.minPrice === "string" && !isNaN(Number(resolvedParams.minPrice)) ? Number(resolvedParams.minPrice) : undefined;
+  const maxPrice = typeof resolvedParams.maxPrice === "string" && !isNaN(Number(resolvedParams.maxPrice)) ? Number(resolvedParams.maxPrice) : undefined;
+  const inStock = resolvedParams.inStock === "true";
+  const search = typeof resolvedParams.search === "string" ? resolvedParams.search : undefined;
 
   const [products, categories] = await Promise.all([
     getProducts({

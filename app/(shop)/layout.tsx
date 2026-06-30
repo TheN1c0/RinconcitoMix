@@ -1,5 +1,6 @@
 import { Header } from "@/components/shop/Header";
 import { Footer } from "@/components/shop/Footer";
+import { CartDrawer } from "@/components/shop/CartDrawer";
 
 export default function ShopLayout({
   children,
@@ -13,6 +14,7 @@ export default function ShopLayout({
         {children}
       </main>
       <Footer />
+      <CartDrawer />
     </div>
   );
 }

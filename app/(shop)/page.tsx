@@ -1,7 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import { getProducts } from "@/lib/services/product.service";
+import { ProductCard } from "@/components/shop/ProductCard";
 
-export default function Home() {
+export default async function Home() {
+  const allProducts = await getProducts({ inStock: true });
+  const featuredProducts = allProducts.slice(0, 4);
+
   return (
     <>
       {/* Hero Section */}
@@ -74,49 +79,9 @@ export default function Home() {
             <p className="font-body-md text-on-surface-variant max-w-2xl mx-auto">Selecciones favoritas amadas por mascotas y dueños.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* We will map over database products later, for now keeping the static UI exactly as the HTML */}
-            <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-[0_4px_12px_rgb(7,69,115,0.04)] border border-surface-container-high group hover:shadow-[0_12px_24px_rgb(7,69,115,0.08)] transition-all duration-300">
-              <div className="relative aspect-square rounded-xl overflow-hidden mb-4 bg-surface-container-low">
-                <img alt="Plaquita Hueso" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 object-left-top" src="https://lh3.googleusercontent.com/aida/ADBb0uhoaDFjWXAeZmpKOCB74p6bZ-mlFv3Q5e7WSHKMaTXVLPR8dsgLOZPK9gcoWum5o9s8__hJofT3yWPEEyOaGisrCM-uxwD9lwGLogC3Bm_YaEIBcTFW9fNYmO9mz5eQ_hZaVwRYKbcfmf3eLWFjY1wavHxr8-mU9zwHOHEYXEPMYv7I7OsTbd47DF6cOiIneo8P0i0fXh5UcUnrEu8syeDiSnnoGPO44KGj0QEndkTpSBeyFpjYLihGAzdVfvd61dcyjtQjfj1a6F4" />
-                <button className="absolute top-3 right-3 p-2 bg-surface-container-lowest/80 backdrop-blur-sm rounded-full text-outline hover:text-error transition-colors">
-                  <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>favorite</span>
-                </button>
-              </div>
-              <div className="space-y-1">
-                <span className="font-label-md text-secondary text-xs uppercase tracking-wider">Plaquitas</span>
-                <h3 className="font-headline-sm text-on-surface line-clamp-1">Plaquita Hueso</h3>
-                <div className="flex items-center justify-between pt-2">
-                  <span className="font-headline-sm text-primary">$4,990</span>
-                  <button className="p-2 bg-primary-fixed text-primary rounded-full hover:bg-primary-fixed-dim transition-colors">
-                    <span className="material-symbols-outlined text-lg">add_shopping_cart</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-surface-container-lowest rounded-2xl p-4 shadow-[0_4px_12px_rgb(7,69,115,0.04)] border border-surface-container-high group hover:shadow-[0_12px_24px_rgb(7,69,115,0.08)] transition-all duration-300">
-              <div className="relative aspect-square rounded-xl overflow-hidden mb-4 bg-surface-container-low">
-                <div className="absolute top-3 left-3 bg-error-container text-on-error-container text-xs font-bold px-2 py-1 rounded-md z-10">Oferta</div>
-                <img alt="Collar de Cuero" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 object-center" src="https://lh3.googleusercontent.com/aida/ADBb0uhoaDFjWXAeZmpKOCB74p6bZ-mlFv3Q5e7WSHKMaTXVLPR8dsgLOZPK9gcoWum5o9s8__hJofT3yWPEEyOaGisrCM-uxwD9lwGLogC3Bm_YaEIBcTFW9fNYmO9mz5eQ_hZaVwRYKbcfmf3eLWFjY1wavHxr8-mU9zwHOHEYXEPMYv7I7OsTbd47DF6cOiIneo8P0i0fXh5UcUnrEu8syeDiSnnoGPO44KGj0QEndkTpSBeyFpjYLihGAzdVfvd61dcyjtQjfj1a6F4" />
-                <button className="absolute top-3 right-3 p-2 bg-surface-container-lowest/80 backdrop-blur-sm rounded-full text-outline hover:text-error transition-colors">
-                  <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>favorite</span>
-                </button>
-              </div>
-              <div className="space-y-1">
-                <span className="font-label-md text-secondary text-xs uppercase tracking-wider">Collares</span>
-                <h3 className="font-headline-sm text-on-surface line-clamp-1">Collar de Cuero Genuino</h3>
-                <div className="flex items-center justify-between pt-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-headline-sm text-primary">$12,990</span>
-                    <span className="font-body-md text-outline line-through text-sm">$15,990</span>
-                  </div>
-                  <button className="p-2 bg-primary-fixed text-primary rounded-full hover:bg-primary-fixed-dim transition-colors">
-                    <span className="material-symbols-outlined text-lg">add_shopping_cart</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
+            {featuredProducts.map((product) => (
+              <ProductCard key={product.id} product={product as any} />
+            ))}
           </div>
           <div className="mt-12 text-center">
             <Link href="/catalogo" className="bg-surface-container-lowest text-primary font-label-md px-8 py-4 rounded-full border border-primary/20 shadow-sm hover:bg-surface-container-low transition-colors inline-flex items-center gap-2">

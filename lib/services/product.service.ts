@@ -61,3 +61,13 @@ export async function getCategories() {
     },
   });
 }
+
+export async function getProductBySlug(slug: string) {
+  return await prisma.product.findUnique({
+    where: { slug },
+    include: {
+      category: true,
+      variants: true,
+    },
+  });
+}
